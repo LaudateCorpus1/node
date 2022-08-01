@@ -339,6 +339,10 @@ EnvironmentOptionsParser::EnvironmentOptionsParser() {
             &EnvironmentOptions::experimental_fetch,
             kAllowedInEnvironment,
             true);
+  AddOption("--experimental-global-customevent",
+            "expose experimental CustomEvent on the global scope",
+            &EnvironmentOptions::experimental_global_customevent,
+            kAllowedInEnvironment);
   AddOption("--experimental-global-webcrypto",
             "expose experimental Web Crypto API on the global scope",
             &EnvironmentOptions::experimental_global_web_crypto,
@@ -604,10 +608,14 @@ EnvironmentOptionsParser::EnvironmentOptionsParser() {
   AddAlias("-pe", { "--print", "--eval" });
   AddAlias("-p", "--print");
   AddOption("--require",
-            "module to preload (option can be repeated)",
-            &EnvironmentOptions::preload_modules,
+            "CommonJS module to preload (option can be repeated)",
+            &EnvironmentOptions::preload_cjs_modules,
             kAllowedInEnvironment);
   AddAlias("-r", "--require");
+  AddOption("--import",
+            "ES module to preload (option can be repeated)",
+            &EnvironmentOptions::preload_esm_modules,
+            kAllowedInEnvironment);
   AddOption("--interactive",
             "always enter the REPL even if stdin does not appear "
             "to be a terminal",

@@ -57,7 +57,6 @@ const expectedModules = new Set([
   'NativeModule internal/console/constructor',
   'NativeModule internal/console/global',
   'NativeModule internal/constants',
-  'NativeModule internal/dtrace',
   'NativeModule internal/encoding',
   'NativeModule internal/errors',
   'NativeModule internal/event_target',
@@ -85,6 +84,7 @@ const expectedModules = new Set([
   'NativeModule internal/modules/esm/loader',
   'NativeModule internal/modules/esm/module_job',
   'NativeModule internal/modules/esm/module_map',
+  'NativeModule internal/modules/esm/package_config',
   'NativeModule internal/modules/esm/resolve',
   'NativeModule internal/modules/esm/translators',
   'NativeModule internal/modules/package_json_reader',
@@ -170,6 +170,7 @@ const expectedModules = new Set([
   'NativeModule v8',
   'NativeModule internal/v8/startup_snapshot',
   'NativeModule vm',
+  'NativeModule diagnostics_channel',
 ]);
 
 if (!common.isMainThread) {
@@ -233,11 +234,6 @@ if (common.hasCrypto) {
   expectedModules.add('NativeModule internal/crypto/util');
   expectedModules.add('NativeModule internal/crypto/x509');
   expectedModules.add('NativeModule internal/streams/lazy_transform');
-}
-
-const { internalBinding } = require('internal/test/binding');
-if (internalBinding('config').hasDtrace) {
-  expectedModules.add('Internal Binding dtrace');
 }
 
 const difference = (setA, setB) => {

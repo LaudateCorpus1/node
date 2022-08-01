@@ -31,7 +31,10 @@ concurrency:
 env:
   ASAN_OPTIONS: intercept_tls_get_addr=0
   PYTHON_VERSION: '3.10'
-  FLAKY_TESTS: dontcare
+  FLAKY_TESTS: keep_retrying
+
+permissions:
+  contents: read
 
 jobs:
   test-asan:
@@ -55,4 +58,4 @@ jobs:
       - name: Build
         run: make build-ci -j2 V=1
       - name: Test
-        run: make run-ci -j2 V=1 TEST_CI_ARGS="-p actions -t 300"
+        run: make run-ci -j2 V=1 TEST_CI_ARGS="-p actions -t 300 --measure-flakiness 9"
