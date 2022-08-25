@@ -177,16 +177,7 @@ inline Environment* Environment::GetCurrent(v8::Isolate* isolate) {
 }
 
 inline Environment* Environment::GetCurrent(v8::Local<v8::Context> context) {
-  if (UNLIKELY(context.IsEmpty())) {
-    return nullptr;
-  }
-  if (UNLIKELY(context->GetNumberOfEmbedderDataFields() <=
-               ContextEmbedderIndex::kContextTag)) {
-    return nullptr;
-  }
-  if (UNLIKELY(context->GetAlignedPointerFromEmbedderData(
-                   ContextEmbedderIndex::kContextTag) !=
-               Environment::kNodeContextTagPtr)) {
+  if (UNLIKELY(!ContextEmbedderTag::IsNodeContext(context))) {
     return nullptr;
   }
   return static_cast<Environment*>(
@@ -832,17 +823,6 @@ void Environment::ForEachBaseObject(T&& iterator) {
     BaseObject* obj = hook.GetBaseObject();
     if (obj != nullptr)
       iterator(obj);
-  }
-}
-
-template <typename T>
-void Environment::ForEachBindingData(T&& iterator) {
-  BindingDataStore* map = static_cast<BindingDataStore*>(
-      context()->GetAlignedPointerFromEmbedderData(
-          ContextEmbedderIndex::kBindingListIndex));
-  DCHECK_NOT_NULL(map);
-  for (auto& it : *map) {
-    iterator(it.first, it.second);
   }
 }
 

@@ -673,22 +673,21 @@ CryptoJobMode GetCryptoJobMode(v8::Local<v8::Value> args) {
 }
 
 namespace {
-// SecureBuffer uses openssl to allocate a Uint8Array using
-// OPENSSL_secure_malloc. Because we do not yet actually
-// make use of secure heap, this has the same semantics as
+// SecureBuffer uses OPENSSL_secure_malloc to allocate a Uint8Array.
+// Without --secure-heap, OpenSSL's secure heap is disabled,
+// in which case this has the same semantics as
 // using OPENSSL_malloc. However, if the secure heap is
 // initialized, SecureBuffer will automatically use it.
 void SecureBuffer(const FunctionCallbackInfo<Value>& args) {
   CHECK(args[0]->IsUint32());
   Environment* env = Environment::GetCurrent(args);
   uint32_t len = args[0].As<Uint32>()->Value();
-  char* data = static_cast<char*>(OPENSSL_secure_malloc(len));
+  void* data = OPENSSL_secure_zalloc(len);
   if (data == nullptr) {
     // There's no memory available for the allocation.
     // Return nothing.
     return;
   }
-  memset(data, 0, len);
   std::shared_ptr<BackingStore> store =
       ArrayBuffer::NewBackingStore(
           data,
@@ -711,19 +710,20 @@ void SecureHeapUsed(const FunctionCallbackInfo<Value>& args) {
 
 namespace Util {
 void Initialize(Environment* env, Local<Object> target) {
+  Local<Context> context = env->context();
 #ifndef OPENSSL_NO_ENGINE
-  env->SetMethod(target, "setEngine", SetEngine);
+  SetMethod(context, target, "setEngine", SetEngine);
 #endif  // !OPENSSL_NO_ENGINE
 
-  env->SetMethodNoSideEffect(target, "getFipsCrypto", GetFipsCrypto);
-  env->SetMethod(target, "setFipsCrypto", SetFipsCrypto);
-  env->SetMethodNoSideEffect(target, "testFipsCrypto", TestFipsCrypto);
+  SetMethodNoSideEffect(context, target, "getFipsCrypto", GetFipsCrypto);
+  SetMethod(context, target, "setFipsCrypto", SetFipsCrypto);
+  SetMethodNoSideEffect(context, target, "testFipsCrypto", TestFipsCrypto);
 
   NODE_DEFINE_CONSTANT(target, kCryptoJobAsync);
   NODE_DEFINE_CONSTANT(target, kCryptoJobSync);
 
-  env->SetMethod(target, "secureBuffer", SecureBuffer);
-  env->SetMethod(target, "secureHeapUsed", SecureHeapUsed);
+  SetMethod(context, target, "secureBuffer", SecureBuffer);
+  SetMethod(context, target, "secureHeapUsed", SecureHeapUsed);
 }
 void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
 #ifndef OPENSSL_NO_ENGINE

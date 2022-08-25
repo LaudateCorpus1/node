@@ -2400,26 +2400,30 @@ BindingData::BindingData(Environment* env, v8::Local<v8::Object> wrap)
 void BindingData::Deserialize(Local<Context> context,
                               Local<Object> holder,
                               int index,
-                              InternalFieldInfo* info) {
-  DCHECK_EQ(index, BaseObject::kSlot);
+                              InternalFieldInfoBase* info) {
+  DCHECK_EQ(index, BaseObject::kEmbedderType);
   HandleScope scope(context->GetIsolate());
   Environment* env = Environment::GetCurrent(context);
   BindingData* binding = env->AddBindingData<BindingData>(context, holder);
   CHECK_NOT_NULL(binding);
 }
 
-void BindingData::PrepareForSerialization(Local<Context> context,
+bool BindingData::PrepareForSerialization(Local<Context> context,
                                           v8::SnapshotCreator* creator) {
   CHECK(file_handle_read_wrap_freelist.empty());
   // We'll just re-initialize the buffers in the constructor since their
   // contents can be thrown away once consumed in the previous call.
   stats_field_array.Release();
   stats_field_bigint_array.Release();
+  // Return true because we need to maintain the reference to the binding from
+  // JS land.
+  return true;
 }
 
-InternalFieldInfo* BindingData::Serialize(int index) {
-  DCHECK_EQ(index, BaseObject::kSlot);
-  InternalFieldInfo* info = InternalFieldInfo::New(type());
+InternalFieldInfoBase* BindingData::Serialize(int index) {
+  DCHECK_EQ(index, BaseObject::kEmbedderType);
+  InternalFieldInfo* info =
+      InternalFieldInfoBase::New<InternalFieldInfo>(type());
   return info;
 }
 
@@ -2433,46 +2437,46 @@ void Initialize(Local<Object> target,
       env->AddBindingData<BindingData>(context, target);
   if (binding_data == nullptr) return;
 
-  env->SetMethod(target, "access", Access);
-  env->SetMethod(target, "close", Close);
-  env->SetMethod(target, "open", Open);
-  env->SetMethod(target, "openFileHandle", OpenFileHandle);
-  env->SetMethod(target, "read", Read);
-  env->SetMethod(target, "readBuffers", ReadBuffers);
-  env->SetMethod(target, "fdatasync", Fdatasync);
-  env->SetMethod(target, "fsync", Fsync);
-  env->SetMethod(target, "rename", Rename);
-  env->SetMethod(target, "ftruncate", FTruncate);
-  env->SetMethod(target, "rmdir", RMDir);
-  env->SetMethod(target, "mkdir", MKDir);
-  env->SetMethod(target, "readdir", ReadDir);
-  env->SetMethod(target, "internalModuleReadJSON", InternalModuleReadJSON);
-  env->SetMethod(target, "internalModuleStat", InternalModuleStat);
-  env->SetMethod(target, "stat", Stat);
-  env->SetMethod(target, "lstat", LStat);
-  env->SetMethod(target, "fstat", FStat);
-  env->SetMethod(target, "link", Link);
-  env->SetMethod(target, "symlink", Symlink);
-  env->SetMethod(target, "readlink", ReadLink);
-  env->SetMethod(target, "unlink", Unlink);
-  env->SetMethod(target, "writeBuffer", WriteBuffer);
-  env->SetMethod(target, "writeBuffers", WriteBuffers);
-  env->SetMethod(target, "writeString", WriteString);
-  env->SetMethod(target, "realpath", RealPath);
-  env->SetMethod(target, "copyFile", CopyFile);
+  SetMethod(context, target, "access", Access);
+  SetMethod(context, target, "close", Close);
+  SetMethod(context, target, "open", Open);
+  SetMethod(context, target, "openFileHandle", OpenFileHandle);
+  SetMethod(context, target, "read", Read);
+  SetMethod(context, target, "readBuffers", ReadBuffers);
+  SetMethod(context, target, "fdatasync", Fdatasync);
+  SetMethod(context, target, "fsync", Fsync);
+  SetMethod(context, target, "rename", Rename);
+  SetMethod(context, target, "ftruncate", FTruncate);
+  SetMethod(context, target, "rmdir", RMDir);
+  SetMethod(context, target, "mkdir", MKDir);
+  SetMethod(context, target, "readdir", ReadDir);
+  SetMethod(context, target, "internalModuleReadJSON", InternalModuleReadJSON);
+  SetMethod(context, target, "internalModuleStat", InternalModuleStat);
+  SetMethod(context, target, "stat", Stat);
+  SetMethod(context, target, "lstat", LStat);
+  SetMethod(context, target, "fstat", FStat);
+  SetMethod(context, target, "link", Link);
+  SetMethod(context, target, "symlink", Symlink);
+  SetMethod(context, target, "readlink", ReadLink);
+  SetMethod(context, target, "unlink", Unlink);
+  SetMethod(context, target, "writeBuffer", WriteBuffer);
+  SetMethod(context, target, "writeBuffers", WriteBuffers);
+  SetMethod(context, target, "writeString", WriteString);
+  SetMethod(context, target, "realpath", RealPath);
+  SetMethod(context, target, "copyFile", CopyFile);
 
-  env->SetMethod(target, "chmod", Chmod);
-  env->SetMethod(target, "fchmod", FChmod);
+  SetMethod(context, target, "chmod", Chmod);
+  SetMethod(context, target, "fchmod", FChmod);
 
-  env->SetMethod(target, "chown", Chown);
-  env->SetMethod(target, "fchown", FChown);
-  env->SetMethod(target, "lchown", LChown);
+  SetMethod(context, target, "chown", Chown);
+  SetMethod(context, target, "fchown", FChown);
+  SetMethod(context, target, "lchown", LChown);
 
-  env->SetMethod(target, "utimes", UTimes);
-  env->SetMethod(target, "futimes", FUTimes);
-  env->SetMethod(target, "lutimes", LUTimes);
+  SetMethod(context, target, "utimes", UTimes);
+  SetMethod(context, target, "futimes", FUTimes);
+  SetMethod(context, target, "lutimes", LUTimes);
 
-  env->SetMethod(target, "mkdtemp", Mkdtemp);
+  SetMethod(context, target, "mkdtemp", Mkdtemp);
 
   target
       ->Set(context,
@@ -2485,11 +2489,11 @@ void Initialize(Local<Object> target,
   StatWatcher::Initialize(env, target);
 
   // Create FunctionTemplate for FSReqCallback
-  Local<FunctionTemplate> fst = env->NewFunctionTemplate(NewFSReqCallback);
+  Local<FunctionTemplate> fst = NewFunctionTemplate(isolate, NewFSReqCallback);
   fst->InstanceTemplate()->SetInternalFieldCount(
       FSReqBase::kInternalFieldCount);
   fst->Inherit(AsyncWrap::GetConstructorTemplate(env));
-  env->SetConstructorFunction(target, "FSReqCallback", fst);
+  SetConstructorFunction(context, target, "FSReqCallback", fst);
 
   // Create FunctionTemplate for FileHandleReadWrap. There’s no need
   // to do anything in the constructor, so we only store the instance template.
@@ -2514,14 +2518,14 @@ void Initialize(Local<Object> target,
   env->set_fsreqpromise_constructor_template(fpo);
 
   // Create FunctionTemplate for FileHandle
-  Local<FunctionTemplate> fd = env->NewFunctionTemplate(FileHandle::New);
+  Local<FunctionTemplate> fd = NewFunctionTemplate(isolate, FileHandle::New);
   fd->Inherit(AsyncWrap::GetConstructorTemplate(env));
-  env->SetProtoMethod(fd, "close", FileHandle::Close);
-  env->SetProtoMethod(fd, "releaseFD", FileHandle::ReleaseFD);
+  SetProtoMethod(isolate, fd, "close", FileHandle::Close);
+  SetProtoMethod(isolate, fd, "releaseFD", FileHandle::ReleaseFD);
   Local<ObjectTemplate> fdt = fd->InstanceTemplate();
   fdt->SetInternalFieldCount(FileHandle::kInternalFieldCount);
   StreamBase::AddMethods(env, fd);
-  env->SetConstructorFunction(target, "FileHandle", fd);
+  SetConstructorFunction(context, target, "FileHandle", fd);
   env->set_fd_constructor_template(fdt);
 
   // Create FunctionTemplate for FileHandle::CloseReq

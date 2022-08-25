@@ -2910,7 +2910,7 @@ is currently in use. Setting to true requires a FIPS build of Node.js.
 This property is deprecated. Please use `crypto.setFips()` and
 `crypto.getFips()` instead.
 
-### `crypto.checkPrime(candidate[, options[, callback]])`
+### `crypto.checkPrime(candidate[, options], callback)`
 
 <!-- YAML
 added: v15.8.0
@@ -2966,7 +2966,9 @@ Checks the primality of the `candidate`.
 added: v0.1.94
 deprecated: v10.0.0
 changes:
-  - version: v17.9.0
+  - version:
+    - v17.9.0
+    - v16.17.0
     pr-url: https://github.com/nodejs/node/pull/42427
     description: The `authTagLength` option is now optional when using the
                  `chacha20-poly1305` cipher and defaults to 16 bytes.
@@ -3030,7 +3032,9 @@ Adversaries][] for details.
 <!-- YAML
 added: v0.1.94
 changes:
-  - version: v17.9.0
+  - version:
+    - v17.9.0
+    - v16.17.0
     pr-url: https://github.com/nodejs/node/pull/42427
     description: The `authTagLength` option is now optional when using the
                  `chacha20-poly1305` cipher and defaults to 16 bytes.
@@ -3103,7 +3107,9 @@ given IV will be.
 added: v0.1.94
 deprecated: v10.0.0
 changes:
-  - version: v17.9.0
+  - version:
+    - v17.9.0
+    - v16.17.0
     pr-url: https://github.com/nodejs/node/pull/42427
     description: The `authTagLength` option is now optional when using the
                  `chacha20-poly1305` cipher and defaults to 16 bytes.
@@ -3145,7 +3151,9 @@ to create the `Decipher` object.
 <!-- YAML
 added: v0.1.94
 changes:
-  - version: v17.9.0
+  - version:
+    - v17.9.0
+    - v16.17.0
     pr-url: https://github.com/nodejs/node/pull/42427
     description: The `authTagLength` option is now optional when using the
                  `chacha20-poly1305` cipher and defaults to 16 bytes.
@@ -3539,6 +3547,9 @@ and it will be impossible to extract the private key from the returned object.
 <!-- YAML
 added: v11.6.0
 changes:
+  - version: v18.8.0
+    pr-url: https://github.com/nodejs/node/pull/44201
+    description: The key can now be zero-length.
   - version: v15.0.0
     pr-url: https://github.com/nodejs/node/pull/35093
     description: The key can also be an ArrayBuffer or string. The encoding
@@ -4206,6 +4217,9 @@ web-compatible code use [`crypto.webcrypto.getRandomValues()`][] instead.
 <!-- YAML
 added: v15.0.0
 changes:
+  - version: v18.8.0
+    pr-url: https://github.com/nodejs/node/pull/44201
+    description: The input keying material can now be zero-length.
   - version: v18.0.0
     pr-url: https://github.com/nodejs/node/pull/41678
     description: Passing an invalid callback to the `callback` argument
@@ -4215,7 +4229,7 @@ changes:
 
 * `digest` {string} The digest algorithm to use.
 * `ikm` {string|ArrayBuffer|Buffer|TypedArray|DataView|KeyObject} The input
-  keying material. It must be at least one byte in length.
+  keying material. Must be provided but can be zero-length.
 * `salt` {string|ArrayBuffer|Buffer|TypedArray|DataView} The salt value. Must
   be provided but can be zero-length.
 * `info` {string|ArrayBuffer|Buffer|TypedArray|DataView} Additional info value.
@@ -4265,11 +4279,15 @@ hkdf('sha512', 'key', 'salt', 'info', 64, (err, derivedKey) => {
 
 <!-- YAML
 added: v15.0.0
+changes:
+  - version: v18.8.0
+    pr-url: https://github.com/nodejs/node/pull/44201
+    description: The input keying material can now be zero-length.
 -->
 
 * `digest` {string} The digest algorithm to use.
 * `ikm` {string|ArrayBuffer|Buffer|TypedArray|DataView|KeyObject} The input
-  keying material. It must be at least one byte in length.
+  keying material. Must be provided but can be zero-length.
 * `salt` {string|ArrayBuffer|Buffer|TypedArray|DataView} The salt value. Must
   be provided but can be zero-length.
 * `info` {string|ArrayBuffer|Buffer|TypedArray|DataView} Additional info value.

@@ -1027,9 +1027,13 @@ equality.
 ## `util.parseArgs([config])`
 
 <!-- YAML
-added: v18.3.0
+added:
+  - v18.3.0
+  - v16.17.0
 changes:
-  - version: v18.7.0
+  - version:
+    - v18.7.0
+    - v16.17.0
     pr-url: https://github.com/nodejs/node/pull/43459
     description: add support for returning detailed parse information
                  using `tokens` in input `config` and returned properties.
@@ -1592,6 +1596,37 @@ added:
 Returns the `string` after replacing any surrogate code points
 (or equivalently, any unpaired surrogate code units) with the
 Unicode "replacement character" U+FFFD.
+
+## `util.transferableAbortController()`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+> Stability: 1 - Experimental
+
+Creates and returns an {AbortController} instance whose {AbortSignal} is marked
+as transferable and can be used with `structuredClone()` or `postMessage()`.
+
+## `util.transferableAbortSignal(signal)`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+> Stability: 1 - Experimental
+
+* `signal` {AbortSignal}
+* Returns: {AbortSignal}
+
+Marks the given {AbortSignal} as transferable so that it can be used with
+`structuredClone()` and `postMessage()`.
+
+```js
+const signal = transferableAbortSignal(AbortSignal.timeout(100));
+const channel = new MessageChannel();
+channel.port2.postMessage(signal, [signal]);
+```
 
 ## `util.types`
 

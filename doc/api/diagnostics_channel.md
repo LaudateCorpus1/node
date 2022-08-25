@@ -152,6 +152,7 @@ const channel = diagnostics_channel.channel('my-channel');
 <!-- YAML
 added:
  - v18.7.0
+ - v16.17.0
 -->
 
 * `name` {string|symbol} The channel name
@@ -184,6 +185,7 @@ diagnostics_channel.subscribe('my-channel', (message, name) => {
 <!-- YAML
 added:
  - v18.7.0
+ - v16.17.0
 -->
 
 * `name` {string|symbol} The channel name
@@ -226,7 +228,7 @@ added:
 -->
 
 The class `Channel` represents an individual named channel within the data
-pipeline. It is use to track subscribers and to publish messages when there
+pipeline. It is used to track subscribers and to publish messages when there
 are subscribers present. It exists as a separate object to avoid channel
 lookups at publish time, enabling very fast publish speeds and allowing
 for heavy use while incurring very minimal cost. Channels are created with
@@ -308,7 +310,9 @@ channel.publish({
 added:
  - v15.1.0
  - v14.17.0
-deprecated: v18.7.0
+deprecated:
+ - v18.7.0
+ - v16.17.0
 -->
 
 > Stability: 0 - Deprecated: Use [`diagnostics_channel.subscribe(name, onMessage)`][]
@@ -347,7 +351,9 @@ channel.subscribe((message, name) => {
 added:
  - v15.1.0
  - v14.17.0
-deprecated: v18.7.0
+deprecated:
+ - v18.7.0
+ - v16.17.0
 changes:
   - version:
     - v17.1.0

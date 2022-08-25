@@ -34,8 +34,8 @@
 #include "handle_wrap.h"
 #include "node.h"
 #include "node_binding.h"
+#include "node_builtins.h"
 #include "node_main_instance.h"
-#include "node_native_module.h"
 #include "node_options.h"
 #include "node_perf_common.h"
 #include "node_snapshotable.h"
@@ -349,6 +349,7 @@ class NoArrayBufferZeroFillScope {
   V(nistcurve_string, "nistCurve")                                             \
   V(node_string, "node")                                                       \
   V(nsname_string, "nsname")                                                   \
+  V(object_string, "Object")                                                   \
   V(ocsp_request_string, "OCSPRequest")                                        \
   V(oncertcb_string, "oncertcb")                                               \
   V(onchange_string, "onchange")                                               \
@@ -477,6 +478,7 @@ class NoArrayBufferZeroFillScope {
   V(binding_data_ctor_template, v8::FunctionTemplate)                          \
   V(blob_constructor_template, v8::FunctionTemplate)                           \
   V(blocklist_constructor_template, v8::FunctionTemplate)                      \
+  V(contextify_global_template, v8::ObjectTemplate)                            \
   V(compiled_fn_entry_template, v8::ObjectTemplate)                            \
   V(dir_instance_template, v8::ObjectTemplate)                                 \
   V(fd_constructor_template, v8::ObjectTemplate)                               \
@@ -548,7 +550,7 @@ class NoArrayBufferZeroFillScope {
   V(maybe_cache_generated_source_map, v8::Function)                            \
   V(messaging_deserialize_create_object, v8::Function)                         \
   V(message_port, v8::Object)                                                  \
-  V(native_module_require, v8::Function)                                       \
+  V(builtin_module_require, v8::Function)                                      \
   V(performance_entry_callback, v8::Function)                                  \
   V(performance_entry_template, v8::Function)                                  \
   V(prepare_stack_trace_callback, v8::Function)                                \
@@ -560,7 +562,6 @@ class NoArrayBufferZeroFillScope {
   V(primordials_safe_weak_set_prototype_object, v8::Object)                    \
   V(promise_hook_handler, v8::Function)                                        \
   V(promise_reject_callback, v8::Function)                                     \
-  V(script_data_constructor_function, v8::Function)                            \
   V(snapshot_serialize_callback, v8::Function)                                 \
   V(snapshot_deserialize_callback, v8::Function)                               \
   V(snapshot_deserialize_main, v8::Function)                                   \
@@ -580,7 +581,7 @@ typedef size_t SnapshotIndex;
 
 struct PropInfo {
   std::string name;     // name for debugging
-  size_t id;            // In the list - in case there are any empty entries
+  uint32_t id;          // In the list - in case there are any empty entries
   SnapshotIndex index;  // In the snapshot
 };
 
@@ -956,20 +957,20 @@ class CleanupHookCallback {
 typedef void (*DeserializeRequestCallback)(v8::Local<v8::Context> context,
                                            v8::Local<v8::Object> holder,
                                            int index,
-                                           InternalFieldInfo* info);
+                                           InternalFieldInfoBase* info);
 struct DeserializeRequest {
   DeserializeRequestCallback cb;
   v8::Global<v8::Object> holder;
   int index;
-  InternalFieldInfo* info = nullptr;  // Owned by the request
+  InternalFieldInfoBase* info = nullptr;  // Owned by the request
 
   // Move constructor
   DeserializeRequest(DeserializeRequest&& other) = default;
 };
 
 struct EnvSerializeInfo {
-  std::vector<PropInfo> bindings;
-  std::vector<std::string> native_modules;
+  std::vector<PropInfo> native_objects;
+  std::vector<std::string> builtins;
   AsyncHooks::SerializeInfo async_hooks;
   TickInfo::SerializeInfo tick_info;
   ImmediateInfo::SerializeInfo immediate_info;
@@ -984,13 +985,30 @@ struct EnvSerializeInfo {
   friend std::ostream& operator<<(std::ostream& o, const EnvSerializeInfo& i);
 };
 
+struct SnapshotMetadata {
+  // For now kFullyCustomized is only built with the --build-snapshot CLI flag.
+  // We might want to add more types of snapshots in the future.
+  enum class Type : uint8_t { kDefault, kFullyCustomized };
+
+  Type type;
+  std::string node_version;
+  std::string node_arch;
+  std::string node_platform;
+  // Result of v8::ScriptCompiler::CachedDataVersionTag().
+  uint32_t v8_cache_version_tag;
+};
+
 struct SnapshotData {
   enum class DataOwnership { kOwned, kNotOwned };
 
-  static const size_t kNodeBaseContextIndex = 0;
-  static const size_t kNodeMainContextIndex = kNodeBaseContextIndex + 1;
+  static const uint32_t kMagic = 0x143da19;
+  static const SnapshotIndex kNodeVMContextIndex = 0;
+  static const SnapshotIndex kNodeBaseContextIndex = kNodeVMContextIndex + 1;
+  static const SnapshotIndex kNodeMainContextIndex = kNodeBaseContextIndex + 1;
 
   DataOwnership data_ownership = DataOwnership::kOwned;
+
+  SnapshotMetadata metadata;
 
   // The result of v8::SnapshotCreator::CreateBlob() during the snapshot
   // building process.
@@ -1000,11 +1018,18 @@ struct SnapshotData {
   // TODO(joyeecheung): there should be a vector of env_info once we snapshot
   // the worker environments.
   EnvSerializeInfo env_info;
+
   // A vector of built-in ids and v8::ScriptCompiler::CachedData, this can be
   // shared across Node.js instances because they are supposed to share the
-  // read only space. We use native_module::CodeCacheInfo because
+  // read only space. We use builtins::CodeCacheInfo because
   // v8::ScriptCompiler::CachedData is not copyable.
-  std::vector<native_module::CodeCacheInfo> code_cache;
+  std::vector<builtins::CodeCacheInfo> code_cache;
+
+  void ToBlob(FILE* out) const;
+  // If returns false, the metadata doesn't match the current Node.js binary,
+  // and the caller should not consume the snapshot data.
+  bool Check() const;
+  static bool FromBlob(SnapshotData* out, FILE* in);
 
   ~SnapshotData();
 
@@ -1039,7 +1064,7 @@ class Environment : public MemoryRetainer {
   void EnqueueDeserializeRequest(DeserializeRequestCallback cb,
                                  v8::Local<v8::Object> holder,
                                  int index,
-                                 InternalFieldInfo* info);
+                                 InternalFieldInfoBase* info);
   void RunDeserializeRequests();
   // Should be called before InitializeInspector()
   void InitializeDiagnostics();
@@ -1201,11 +1226,11 @@ class Environment : public MemoryRetainer {
   inline std::vector<double>* destroy_async_id_list();
 
   std::set<struct node_module*> internal_bindings;
-  std::set<std::string> native_modules_with_cache;
-  std::set<std::string> native_modules_without_cache;
+  std::set<std::string> builtins_with_cache;
+  std::set<std::string> builtins_without_cache;
   // This is only filled during deserialization. We use a vector since
   // it's only used for tests.
-  std::vector<std::string> native_modules_in_snapshot;
+  std::vector<std::string> builtins_in_snapshot;
 
   std::unordered_multimap<int, loader::ModuleWrap*> hash_to_module_map;
   std::unordered_map<uint32_t, loader::ModuleWrap*> id_to_module_map;
@@ -1291,56 +1316,6 @@ class Environment : public MemoryRetainer {
                                const char* message = nullptr,
                                const char* path = nullptr,
                                const char* dest = nullptr);
-
-  v8::Local<v8::FunctionTemplate> NewFunctionTemplate(
-      v8::FunctionCallback callback,
-      v8::Local<v8::Signature> signature = v8::Local<v8::Signature>(),
-      v8::ConstructorBehavior behavior = v8::ConstructorBehavior::kAllow,
-      v8::SideEffectType side_effect = v8::SideEffectType::kHasSideEffect,
-      const v8::CFunction* c_function = nullptr);
-
-  // Convenience methods for NewFunctionTemplate().
-  void SetMethod(v8::Local<v8::Object> that,
-                 const char* name,
-                 v8::FunctionCallback callback);
-
-  void SetFastMethod(v8::Local<v8::Object> that,
-                     const char* name,
-                     v8::FunctionCallback slow_callback,
-                     const v8::CFunction* c_function);
-
-  void SetProtoMethod(v8::Local<v8::FunctionTemplate> that,
-                      const char* name,
-                      v8::FunctionCallback callback);
-
-  void SetInstanceMethod(v8::Local<v8::FunctionTemplate> that,
-                         const char* name,
-                         v8::FunctionCallback callback);
-
-  // Safe variants denote the function has no side effects.
-  void SetMethodNoSideEffect(v8::Local<v8::Object> that,
-                             const char* name,
-                             v8::FunctionCallback callback);
-  void SetProtoMethodNoSideEffect(v8::Local<v8::FunctionTemplate> that,
-                                  const char* name,
-                                  v8::FunctionCallback callback);
-
-  enum class SetConstructorFunctionFlag {
-    NONE,
-    SET_CLASS_NAME,
-  };
-
-  void SetConstructorFunction(v8::Local<v8::Object> that,
-                              const char* name,
-                              v8::Local<v8::FunctionTemplate> tmpl,
-                              SetConstructorFunctionFlag flag =
-                                  SetConstructorFunctionFlag::SET_CLASS_NAME);
-
-  void SetConstructorFunction(v8::Local<v8::Object> that,
-                              v8::Local<v8::String> name,
-                              v8::Local<v8::FunctionTemplate> tmpl,
-                              SetConstructorFunctionFlag flag =
-                                  SetConstructorFunctionFlag::SET_CLASS_NAME);
 
   void AtExit(void (*cb)(void* arg), void* arg);
   void RunAtExitCallbacks();
@@ -1512,7 +1487,7 @@ class Environment : public MemoryRetainer {
   void RemoveUnmanagedFd(int fd);
 
   template <typename T>
-  void ForEachBindingData(T&& iterator);
+  void ForEachBaseObject(T&& iterator);
 
  private:
   inline void ThrowError(v8::Local<v8::Value> (*fun)(v8::Local<v8::String>),
@@ -1600,9 +1575,6 @@ class Environment : public MemoryRetainer {
   uint64_t thread_id_;
   std::unordered_set<worker::Worker*> sub_worker_contexts_;
 
-  static void* const kNodeContextTagPtr;
-  static int const kNodeContextTag;
-
 #if HAVE_INSPECTOR
   std::unique_ptr<inspector::Agent> inspector_agent_;
   bool is_in_inspector_console_call_ = false;
@@ -1669,9 +1641,6 @@ class Environment : public MemoryRetainer {
 
   std::function<void(Environment*, int)> process_exit_handler_ {
       DefaultProcessExitHandler };
-
-  template <typename T>
-  void ForEachBaseObject(T&& iterator);
 
 #define V(PropertyName, TypeName) v8::Global<TypeName> PropertyName ## _;
   ENVIRONMENT_STRONG_PERSISTENT_VALUES(V)

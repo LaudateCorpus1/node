@@ -296,6 +296,10 @@ For information about the governance of the Node.js project, see
   **Colin Ihrig** <<cjihrig@gmail.com>> (he/him)
 * [codebytere](https://github.com/codebytere) -
   **Shelley Vohr** <<shelley.vohr@gmail.com>> (she/her)
+* [cola119](https://github.com/cola119) -
+  **Kohei Ueno** <<kohei.ueno119@gmail.com>> (he/him)
+* [daeyeon](https://github.com/daeyeon) -
+  **Daeyeon Jeong** <<daeyeon.dev@gmail.com>> (he/him)
 * [danbev](https://github.com/danbev) -
   **Daniel Bevenius** <<daniel.bevenius@gmail.com>> (he/him)
 * [danielleadams](https://github.com/danielleadams) -
@@ -310,6 +314,8 @@ For information about the governance of the Node.js project, see
   **Daniele Belardi** <<dwon.dnl@gmail.com>> (he/him)
 * [edsadr](https://github.com/edsadr) -
   **Adrian Estrada** <<edsadr@gmail.com>> (he/him)
+* [erickwendel](https://github.com/erickwendel) -
+  **Erick Wendel** <<erick.workspace@gmail.com>> (he/him)
 * [evanlucas](https://github.com/evanlucas) -
   **Evan Lucas** <<evanlucas@me.com>> (he/him)
 * [fhinkel](https://github.com/fhinkel) -
@@ -380,6 +386,8 @@ For information about the governance of the Node.js project, see
   **Milad Fa** <<mfarazma@redhat.com>> (he/him)
 * [mildsunrise](https://github.com/mildsunrise) -
   **Alba Mendez** <<me@alba.sh>> (she/her)
+* [MoLow](https://github.com/MoLow) -
+  **Moshe Atlow** <<moshe@atlow.co.il>> (he/him)
 * [mscdex](https://github.com/mscdex) -
   **Brian White** <<mscdex@mscdex.net>>
 * [MylesBorins](https://github.com/MylesBorins) -
@@ -405,7 +413,7 @@ For information about the governance of the Node.js project, see
 * [ronag](https://github.com/ronag) -
   **Robert Nagy** <<ronagy@icloud.com>>
 * [ruyadorno](https://github.com/ruyadorno) -
-  **Ruy Adorno** <<ruyadorno@github.com>> (he/him)
+  **Ruy Adorno** <<ruyadorno@google.com>> (he/him)
 * [rvagg](https://github.com/rvagg) -
   **Rod Vagg** <<rod@vagg.org>>
 * [ryzokuken](https://github.com/ryzokuken) -
@@ -424,6 +432,8 @@ For information about the governance of the Node.js project, see
   **Stewart X Addison** <<sxa@redhat.com>> (he/him)
 * [targos](https://github.com/targos) -
   **Michaël Zasso** <<targos@protonmail.com>> (he/him)
+* [theanarkh](https://github.com/theanarkh) -
+  **theanarkh** <<theratliter@gmail.com>> (he/him)
 * [TimothyGu](https://github.com/TimothyGu) -
   **Tiancheng "Timothy" Gu** <<timothygu99@gmail.com>> (he/him)
 * [tniessen](https://github.com/tniessen) -
