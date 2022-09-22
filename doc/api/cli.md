@@ -351,16 +351,6 @@ added:
 
 Expose the [CustomEvent Web API][] on the global scope.
 
-### `--experimental-global-webcrypto`
-
-<!-- YAML
-added:
-  - v17.6.0
-  - v16.15.0
--->
-
-Expose the [Web Crypto API][] on the global scope.
-
 ### `--experimental-import-meta-resolve`
 
 <!-- YAML
@@ -412,6 +402,14 @@ added: v18.0.0
 -->
 
 Disable experimental support for the [Fetch API][].
+
+### `--no-experimental-global-webcrypto`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+Disable exposition of [Web Crypto API][] on the global scope.
 
 ### `--no-experimental-repl-await`
 
@@ -1512,7 +1510,7 @@ loading phase, it will always raise it as an uncaught exception.
 added: v18.8.0
 -->
 
-Force updating snapshot files for [`assert.snapshot()`][]
+Updates snapshot files used by [`assert.snapshot()`][].
 
 ### `--use-bundled-ca`, `--use-openssl-ca`
 
@@ -1576,6 +1574,53 @@ on the number of online processors.
 
 If the value provided is larger than V8's maximum, then the largest value
 will be chosen.
+
+### `--watch`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+> Stability: 1 - Experimental
+
+Starts Node.js in watch mode.
+When in watch mode, changes in the watched files cause the Node.js process to
+restart.
+By default, watch mode will watch the entry point
+and any required or imported module.
+Use `--watch-path` to specify what paths to watch.
+
+This flag cannot be combined with
+`--check`, `--eval`, `--interactive`, or the REPL.
+
+```console
+$ node --watch index.js
+```
+
+### `--watch-path`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+> Stability: 1 - Experimental
+
+Starts Node.js in watch mode and specifies what paths to watch.
+When in watch mode, changes in the watched paths cause the Node.js process to
+restart.
+This will turn off watching of required or imported modules, even when used in
+combination with `--watch`.
+
+This flag cannot be combined with
+`--check`, `--eval`, `--interactive`, or the REPL.
+
+```console
+$ node --watch-path=./src --watch-path=./tests index.js
+```
+
+This option is only supported on macOS and Windows.
+An `ERR_FEATURE_UNAVAILABLE_ON_PLATFORM` exception will be thrown
+when the option is used on a platform that does not support it.
 
 ### `--zero-fill-buffers`
 
@@ -1792,7 +1837,6 @@ Node.js options that are allowed are:
 * `--enable-source-maps`
 * `--experimental-abortcontroller`
 * `--experimental-global-customevent`
-* `--experimental-global-webcrypto`
 * `--experimental-import-meta-resolve`
 * `--experimental-json-modules`
 * `--experimental-loader`
@@ -1825,6 +1869,7 @@ Node.js options that are allowed are:
 * `--no-addons`
 * `--no-deprecation`
 * `--no-experimental-fetch`
+* `--no-experimental-global-webcrypto`
 * `--no-experimental-repl-await`
 * `--no-extra-info-on-fatal-exception`
 * `--no-force-async-hooks-checks`
@@ -1880,6 +1925,8 @@ Node.js options that are allowed are:
 * `--use-largepages`
 * `--use-openssl-ca`
 * `--v8-pool-size`
+* `--watch-path`
+* `--watch`
 * `--zero-fill-buffers`
 
 <!-- node-options-node end -->

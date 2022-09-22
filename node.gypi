@@ -145,7 +145,7 @@
             },
           },
           'conditions': [
-            ['OS!="aix" and node_shared=="false"', {
+            ['OS!="aix" and OS!="ios" and node_shared=="false"', {
               'ldflags': [
                 '-Wl,--whole-archive',
                 '<(obj_dir)/deps/zlib/<(STATIC_LIB_PREFIX)zlib<(STATIC_LIB_SUFFIX)',
@@ -184,7 +184,7 @@
             },
           },
           'conditions': [
-            ['OS!="aix" and node_shared=="false"', {
+            ['OS!="aix" and OS!="ios" and node_shared=="false"', {
               'ldflags': [
                 '-Wl,--whole-archive',
                 '<(obj_dir)/deps/uv/<(STATIC_LIB_PREFIX)uv<(STATIC_LIB_SUFFIX)',
@@ -315,6 +315,12 @@
             'OTHER_LDFLAGS': [ '--coverage', ],
           },
         }],
+      ],
+    }],
+    [ 'coverage=="true"', {
+      'defines': [
+        'ALLOW_ATTACHING_DEBUGGER_IN_WATCH_MODE',
+        'ALLOW_ATTACHING_DEBUGGER_IN_TEST_RUNNER',
       ],
     }],
     [ 'OS=="sunos"', {

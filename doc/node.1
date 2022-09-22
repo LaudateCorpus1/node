@@ -165,6 +165,9 @@ Use this flag to enable ShadowRealm support.
 .It Fl -no-experimental-fetch
 Disable experimental support for the Fetch API.
 .
+.It Fl -no-experimental-global-webcrypto
+Disable exposition of the Web Crypto API on the global scope.
+.
 .It Fl -no-experimental-repl-await
 Disable top-level await keyword support in REPL.
 .
@@ -485,6 +488,9 @@ Track heap object allocations for heap snapshots.
 .
 .It Fl -unhandled-rejections=mode
 Define the behavior for unhandled rejections. Can be one of `strict` (raise an error), `warn` (enforce warnings) or `none` (silence warnings).
+.
+.It Fl -update-assert-snapshot
+Updates snapshot files used by `assert.snapshot()`.
 .
 .It Fl -use-bundled-ca , Fl -use-openssl-ca
 Use bundled Mozilla CA store as supplied by current Node.js version or use OpenSSL's default CA store.

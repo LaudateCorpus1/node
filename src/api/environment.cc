@@ -5,6 +5,7 @@
 #include "node_internals.h"
 #include "node_options-inl.h"
 #include "node_platform.h"
+#include "node_realm-inl.h"
 #include "node_shadow_realm.h"
 #include "node_v8_platform-inl.h"
 #include "node_wasm_web_api.h"
@@ -378,7 +379,7 @@ Environment* CreateEnvironment(
   }
 #endif
 
-  if (env->RunBootstrapping().IsEmpty()) {
+  if (env->principal_realm()->RunBootstrapping().IsEmpty()) {
     FreeEnvironment(env);
     return nullptr;
   }
@@ -453,11 +454,9 @@ MaybeLocal<Value> LoadEnvironment(
         builtins::BuiltinLoader::Add(
             name.c_str(), UnionBytes(**main_utf16, main_utf16->length()));
         env->set_main_utf16(std::move(main_utf16));
-        // Arguments must match the parameters specified in
-        // BuiltinLoader::LookupAndCompile().
-        std::vector<Local<Value>> args = {env->process_object(),
-                                          env->builtin_module_require()};
-        return ExecuteBootstrapper(env, name.c_str(), &args);
+        Realm* realm = env->principal_realm();
+
+        return realm->ExecuteBootstrapper(name.c_str());
       });
 }
 
@@ -556,6 +555,19 @@ Maybe<bool> InitializeContextRuntime(Local<Context> context) {
   Isolate* isolate = context->GetIsolate();
   HandleScope handle_scope(isolate);
 
+  // When `IsCodeGenerationFromStringsAllowed` is true, V8 takes the fast path
+  // and ignores the ModifyCodeGenerationFromStrings callback. Set it to false
+  // to delegate the code generation validation to
+  // node::ModifyCodeGenerationFromStrings.
+  // The `IsCodeGenerationFromStringsAllowed` can be refreshed by V8 according
+  // to the runtime flags, propagate the value to the embedder data.
+  bool is_code_generation_from_strings_allowed =
+      context->IsCodeGenerationFromStringsAllowed();
+  context->AllowCodeGenerationFromStrings(false);
+  context->SetEmbedderData(
+      ContextEmbedderIndex::kAllowCodeGenerationFromStrings,
+      is_code_generation_from_strings_allowed ? True(isolate) : False(isolate));
+
   if (per_process::cli_options->disable_proto == "") {
     return Just(true);
   }
@@ -648,11 +660,11 @@ Maybe<bool> InitializeMainContextForSnapshot(Local<Context> context) {
   Isolate* isolate = context->GetIsolate();
   HandleScope handle_scope(isolate);
 
-  context->AllowCodeGenerationFromStrings(false);
-  context->SetEmbedderData(
-      ContextEmbedderIndex::kAllowCodeGenerationFromStrings, True(isolate));
+  // Initialize the default values.
   context->SetEmbedderData(ContextEmbedderIndex::kAllowWasmCodeGeneration,
                            True(isolate));
+  context->SetEmbedderData(
+      ContextEmbedderIndex::kAllowCodeGenerationFromStrings, True(isolate));
 
   if (InitializeBaseContextForSnapshot(context).IsNothing()) {
     return Nothing<bool>();
@@ -683,19 +695,11 @@ Maybe<bool> InitializePrimordials(Local<Context> context) {
                                         nullptr};
 
   for (const char** module = context_files; *module != nullptr; module++) {
-    // Arguments must match the parameters specified in
-    // BuiltinLoader::LookupAndCompile().
-    Local<Value> arguments[] = {context->Global(), exports, primordials};
-    MaybeLocal<Function> maybe_fn =
-        builtins::BuiltinLoader::LookupAndCompile(context, *module, nullptr);
-    Local<Function> fn;
-    if (!maybe_fn.ToLocal(&fn)) {
-      return Nothing<bool>();
-    }
-    MaybeLocal<Value> result =
-        fn->Call(context, Undefined(isolate), arraysize(arguments), arguments);
-    // Execution failed during context creation.
-    if (result.IsEmpty()) {
+    Local<Value> arguments[] = {exports, primordials};
+    if (builtins::BuiltinLoader::CompileAndCall(
+            context, *module, arraysize(arguments), arguments, nullptr)
+            .IsEmpty()) {
+      // Execution failed during context creation.
       return Nothing<bool>();
     }
   }
@@ -762,6 +766,7 @@ ThreadId AllocateEnvironmentThreadId() {
 void DefaultProcessExitHandler(Environment* env, int exit_code) {
   env->set_can_call_into_js(false);
   env->stop_sub_worker_contexts();
+  env->isolate()->DumpAndResetStats();
   DisposePlatform();
   uv_library_shutdown();
   exit(exit_code);

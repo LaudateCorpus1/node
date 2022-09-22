@@ -71,6 +71,7 @@ class DebugOptions : public Options {
   DebugOptions(DebugOptions&&) = default;
   DebugOptions& operator=(DebugOptions&&) = default;
 
+  bool allow_attaching_debugger = true;
   // --inspect
   bool inspector_enabled = false;
   // --debug
@@ -109,7 +110,7 @@ class EnvironmentOptions : public Options {
   bool enable_source_maps = false;
   bool experimental_fetch = true;
   bool experimental_global_customevent = false;
-  bool experimental_global_web_crypto = false;
+  bool experimental_global_web_crypto = true;
   bool experimental_https_modules = false;
   std::string experimental_specifier_resolution;
   bool experimental_wasm_modules = false;
@@ -171,6 +172,10 @@ class EnvironmentOptions : public Options {
 #else
       false;
 #endif  // DEBUG
+
+  bool watch_mode = false;
+  bool watch_mode_report_to_parent = false;
+  std::vector<std::string> watch_mode_paths;
 
   bool syntax_check_only = false;
   bool has_eval_string = false;
