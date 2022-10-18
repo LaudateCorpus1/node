@@ -400,10 +400,14 @@ only if the Node.js binary was compiled with including support for the
 added:
   - v18.7.0
   - v16.17.0
+changes:
+  - version: REPLACEME
+    pr-url: https://github.com/nodejs/node/pull/44860
+    description: No longer behind `--experimental-global-customevent` CLI flag.
 -->
 
-> Stability: 1 - Experimental. Enable this API with the
-> [`--experimental-global-customevent`][] CLI flag.
+> Stability: 1 - Experimental. Disable this API with the
+> [`--no-experimental-global-customevent`][] CLI flag.
 
 <!-- type=global -->
 
@@ -540,6 +544,68 @@ The `MessagePort` class. See [`MessagePort`][] for more details.
 ## `module`
 
 This variable may appear to be global but is not. See [`module`][].
+
+## `PerformanceEntry`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+<!-- type=global -->
+
+The `PerformanceEntry` class. See [`PerformanceEntry`][] for more details.
+
+## `PerformanceMark`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+<!-- type=global -->
+
+The `PerformanceMark` class. See [`PerformanceMark`][] for more details.
+
+## `PerformanceMeasure`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+<!-- type=global -->
+
+The `PerformanceMeasure` class. See [`PerformanceMeasure`][] for more details.
+
+## `PerformanceObserver`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+<!-- type=global -->
+
+The `PerformanceObserver` class. See [`PerformanceObserver`][] for more details.
+
+## `PerformanceObserverEntryList`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+<!-- type=global -->
+
+The `PerformanceObserverEntryList` class. See
+[`PerformanceObserverEntryList`][] for more details.
+
+## `PerformanceResourceTiming`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+<!-- type=global -->
+
+The `PerformanceResourceTiming` class. See [`PerformanceResourceTiming`][] for
+more details.
 
 ## `performance`
 
@@ -885,8 +951,8 @@ added: v18.0.0
 A browser-compatible implementation of [`WritableStreamDefaultWriter`][].
 
 [Web Crypto API]: webcrypto.md
-[`--experimental-global-customevent`]: cli.md#--experimental-global-customevent
 [`--no-experimental-fetch`]: cli.md#--no-experimental-fetch
+[`--no-experimental-global-customevent`]: cli.md#--no-experimental-global-customevent
 [`--no-experimental-global-webcrypto`]: cli.md#--no-experimental-global-webcrypto
 [`AbortController`]: https://developer.mozilla.org/en-US/docs/Web/API/AbortController
 [`ByteLengthQueuingStrategy`]: webstreams.md#class-bytelengthqueuingstrategy
@@ -899,6 +965,12 @@ A browser-compatible implementation of [`WritableStreamDefaultWriter`][].
 [`MessageChannel`]: worker_threads.md#class-messagechannel
 [`MessageEvent`]: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/MessageEvent
 [`MessagePort`]: worker_threads.md#class-messageport
+[`PerformanceEntry`]: perf_hooks.md#class-performanceentry
+[`PerformanceMark`]: perf_hooks.md#class-performancemark
+[`PerformanceMeasure`]: perf_hooks.md#class-performancemeasure
+[`PerformanceObserverEntryList`]: perf_hooks.md#class-performanceobserverentrylist
+[`PerformanceObserver`]: perf_hooks.md#class-performanceobserver
+[`PerformanceResourceTiming`]: perf_hooks.md#class-performanceresourcetiming
 [`ReadableByteStreamController`]: webstreams.md#class-readablebytestreamcontroller
 [`ReadableStreamBYOBReader`]: webstreams.md#class-readablestreambyobreader
 [`ReadableStreamBYOBRequest`]: webstreams.md#class-readablestreambyobrequest

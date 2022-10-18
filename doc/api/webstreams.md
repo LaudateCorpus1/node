@@ -300,7 +300,9 @@ is active.
 <!-- YAML
 added: v16.5.0
 changes:
-  - version: REPLACEME
+  - version:
+    - v18.10.0
+    - v16.18.0
     pr-url: https://github.com/nodejs/node/pull/44505
     description: Support teeing a readable byte stream.
 -->
@@ -651,6 +653,10 @@ Signals an error that causes the {ReadableStream} to error and close.
 
 <!-- YAML
 added: v16.5.0
+changes:
+  - version: v18.10.0
+    pr-url: https://github.com/nodejs/node/pull/44702
+    description: Support handling a BYOB pull request from a released reader.
 -->
 
 Every {ReadableStream} has a controller that is responsible for

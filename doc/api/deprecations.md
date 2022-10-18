@@ -2288,6 +2288,9 @@ future release.
 
 <!-- YAML
 changes:
+  - version: REPLACEME
+    pr-url: https://github.com/nodejs/node/pull/44919
+    description: \`url.parse()` is deprecated again in DEP0169.
   - version:
       - v15.13.0
       - v14.17.0
@@ -2300,7 +2303,7 @@ changes:
 
 Type: Deprecation revoked
 
-The [Legacy URL API][] is deprecated. This includes [`url.format()`][],
+The [legacy URL API][] is deprecated. This includes [`url.format()`][],
 [`url.parse()`][], [`url.resolve()`][], and the [legacy `urlObject`][]. Please
 use the [WHATWG URL API][] instead.
 
@@ -2889,7 +2892,7 @@ Prefer [`message.socket`][] over [`message.connection`][].
 
 <!-- YAML
 changes:
-  - version: REPLACEME
+  - version: v18.10.0
     pr-url: https://github.com/nodejs/node/pull/43627
     description: End-of-Life.
   - version: v16.0.0
@@ -3131,7 +3134,7 @@ resources and not the actual references.
 
 <!-- YAML
 changes:
-  - version: REPLACEME
+  - version: v18.10.0
     pr-url: https://github.com/nodejs/node/pull/42796
     description: End-of-Life.
   - version: v18.0.0
@@ -3171,27 +3174,40 @@ Use [`diagnostics_channel.subscribe(name, onMessage)`][] or
 [`diagnostics_channel.unsubscribe(name, onMessage)`][] which does the same
 thing instead.
 
-### DEP0164: `process.exit([code])` coercion to integer
+### DEP0164: `process.exit(code)`, `process.exitCode` coercion to integer
 
 <!-- YAML
 changes:
+  - version: REPLACEME
+    pr-url: https://github.com/nodejs/node/pull/44711
+    description: Runtime deprecation.
+  - version:
+    - v18.10.0
+    - v16.18.0
+    pr-url: https://github.com/nodejs/node/pull/44714
+    description: Documentation-only deprecation of `process.exitCode` integer
+                 coercion.
   - version:
     - v18.7.0
     - v16.17.0
     pr-url: https://github.com/nodejs/node/pull/43738
-    description: Documentation-only deprecation.
+    description: Documentation-only deprecation of `process.exit(code)` integer
+                 coercion.
 -->
 
-Type: Documentation-only
+Type: Runtime
 
-`code` values other than `undefined`, `null`, integer numbers and integer
-strings (e.g., '1') are deprecated as parameter in [`process.exit()`][].
+Values other than `undefined`, `null`, integer numbers, and integer strings
+(e.g., `'1'`) are deprecated as value for the `code` parameter in
+[`process.exit()`][] and as value to assign to [`process.exitCode`][].
 
 ### DEP0165: `--trace-atomics-wait`
 
 <!-- YAML
 changes:
-  - version: v18.8.0
+  - version:
+    - v18.8.0
+    - v16.18.0
     pr-url: https://github.com/nodejs/node/pull/44093
     description: Documentation-only deprecation.
 -->
@@ -3204,10 +3220,10 @@ The [`--trace-atomics-wait`][] flag is deprecated.
 
 <!-- YAML
 changes:
-  - version: REPLACEME
+  - version: v18.10.0
     pr-url: https://github.com/nodejs/node/pull/44495
     description: Runtime deprecation.
-  - version: REPLACEME
+  - version: v18.10.0
     pr-url: https://github.com/nodejs/node/pull/44477
     description: Documentation-only deprecation
                  with `--pending-deprecation` support.
@@ -3224,7 +3240,9 @@ starting or ending in a slash.
 
 <!-- YAML
 changes:
-  - version: REPLACEME
+  - version:
+    - v18.10.0
+    - v16.18.0
     pr-url: https://github.com/nodejs/node/pull/44588
     description: Documentation-only deprecation.
 -->
@@ -3249,7 +3267,7 @@ changes:
     description: Runtime deprecation.
 -->
 
-Type: Runtime.
+Type: Runtime
 
 The implicit suppression of uncaught exceptions in Node-API callbacks is now
 deprecated.
@@ -3258,7 +3276,22 @@ Set the flag [`--force-node-api-uncaught-exceptions-policy`][] to force Node.js
 to emit an [`'uncaughtException'`][] event if the exception is not handled in
 Node-API callbacks.
 
-[Legacy URL API]: url.md#legacy-url-api
+### DEP0169: Insecure url.parse()
+
+<!-- YAML
+changes:
+  - version:
+      - REPLACEME
+    pr-url: https://github.com/nodejs/node/pull/44919
+    description: Documentation-only deprecation.
+-->
+
+Type: Documentation-only
+
+[`url.parse()`][] behavior is not standardized and prone to errors that
+have security implications. Use the [WHATWG URL API][] instead. CVEs are not
+issued for `url.parse()` vulnerabilities.
+
 [NIST SP 800-38D]: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf
 [RFC 6066]: https://tools.ietf.org/html/rfc6066#section-3
 [RFC 8247 Section 2.4]: https://www.rfc-editor.org/rfc/rfc8247#section-2.4
@@ -3341,6 +3374,7 @@ Node-API callbacks.
 [`os.tmpdir()`]: os.md#ostmpdir
 [`process.env`]: process.md#processenv
 [`process.exit()`]: process.md#processexitcode
+[`process.exitCode`]: process.md#processexitcode_1
 [`process.getActiveResourcesInfo()`]: process.md#processgetactiveresourcesinfo
 [`process.mainModule`]: process.md#processmainmodule
 [`punycode`]: punycode.md
@@ -3403,6 +3437,7 @@ Node-API callbacks.
 [alloc_unsafe_size]: buffer.md#static-method-bufferallocunsafesize
 [from_arraybuffer]: buffer.md#static-method-bufferfromarraybuffer-byteoffset-length
 [from_string_encoding]: buffer.md#static-method-bufferfromstring-encoding
+[legacy URL API]: url.md#legacy-url-api
 [legacy `urlObject`]: url.md#legacy-urlobject
 [static methods of `crypto.Certificate()`]: crypto.md#class-certificate
 [subpath exports]: packages.md#subpath-exports

@@ -113,14 +113,6 @@ void EnvironmentOptions::CheckOptions(std::vector<std::string>* errors) {
     }
   }
 
-  if (!experimental_specifier_resolution.empty()) {
-    if (experimental_specifier_resolution != "node" &&
-        experimental_specifier_resolution != "explicit") {
-      errors->push_back(
-        "invalid value for --experimental-specifier-resolution");
-    }
-  }
-
   if (syntax_check_only && has_eval_string) {
     errors->push_back("either --check or --eval can be used, not both");
   }
@@ -366,7 +358,8 @@ EnvironmentOptionsParser::EnvironmentOptionsParser() {
   AddOption("--experimental-global-customevent",
             "expose experimental CustomEvent on the global scope",
             &EnvironmentOptions::experimental_global_customevent,
-            kAllowedInEnvironment);
+            kAllowedInEnvironment,
+            true);
   AddOption("--experimental-global-webcrypto",
             "expose experimental Web Crypto API on the global scope",
             &EnvironmentOptions::experimental_global_web_crypto,
@@ -444,11 +437,8 @@ EnvironmentOptionsParser::EnvironmentOptionsParser() {
             "set module type for string input",
             &EnvironmentOptions::module_type,
             kAllowedInEnvironment);
-  AddOption("--experimental-specifier-resolution",
-            "Select extension resolution algorithm for es modules; "
-            "either 'explicit' (default) or 'node'",
-            &EnvironmentOptions::experimental_specifier_resolution,
-            kAllowedInEnvironment);
+  AddOption(
+      "--experimental-specifier-resolution", "", NoOp{}, kAllowedInEnvironment);
   AddAlias("--es-module-specifier-resolution",
            "--experimental-specifier-resolution");
   AddOption("--deprecation",
@@ -554,6 +544,9 @@ EnvironmentOptionsParser::EnvironmentOptionsParser() {
   AddOption("--test",
             "launch test runner on startup",
             &EnvironmentOptions::test_runner);
+  AddOption("--test-name-pattern",
+            "run tests whose name matches this regular expression",
+            &EnvironmentOptions::test_name_pattern);
   AddOption("--test-only",
             "run tests with 'only' option set",
             &EnvironmentOptions::test_only,

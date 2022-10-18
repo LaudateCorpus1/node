@@ -341,16 +341,6 @@ when `Error.stack` is accessed. If you access `Error.stack` frequently
 in your application, take into account the performance implications
 of `--enable-source-maps`.
 
-### `--experimental-global-customevent`
-
-<!-- YAML
-added:
-  - v18.7.0
-  - v16.17.0
--->
-
-Expose the [CustomEvent Web API][] on the global scope.
-
 ### `--experimental-import-meta-resolve`
 
 <!-- YAML
@@ -411,6 +401,14 @@ added: REPLACEME
 
 Disable exposition of [Web Crypto API][] on the global scope.
 
+### `--no-experimental-global-customevent`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+Disable exposition of [CustomEvent Web API][] on the global scope.
+
 ### `--no-experimental-repl-await`
 
 <!-- YAML
@@ -426,23 +424,6 @@ added: REPLACEME
 -->
 
 Use this flag to enable [ShadowRealm][] support.
-
-### `--experimental-specifier-resolution=mode`
-
-<!-- YAML
-added:
- - v13.4.0
- - v12.16.0
--->
-
-Sets the resolution algorithm for resolving ES module specifiers. Valid options
-are `explicit` and `node`.
-
-The default is `explicit`, which requires providing the full path to a
-module. The `node` mode enables support for optional file extensions and
-the ability to import a directory that has an index file.
-
-See [customizing ESM specifier resolution][] for example usage.
 
 ### `--experimental-vm-modules`
 
@@ -989,7 +970,7 @@ however, for backward compatibility with older Node.js versions.
 `--preserve-symlinks` when it is not desirable to follow symlinks before
 resolving relative paths.
 
-See `--preserve-symlinks` for more information.
+See [`--preserve-symlinks`][] for more information.
 
 ### `--prof`
 
@@ -1140,7 +1121,9 @@ Default signal is `SIGUSR2`.
 <!-- YAML
 added: v11.8.0
 changes:
-  - version: v18.8.0
+  - version:
+      - v18.8.0
+      - v16.18.0
     pr-url: https://github.com/nodejs/node/pull/44208
     description: Report is not generated if the uncaught exception is handled.
   - version:
@@ -1230,6 +1213,16 @@ added:
 Starts the Node.js command line test runner. This flag cannot be combined with
 `--check`, `--eval`, `--interactive`, or the inspector. See the documentation
 on [running tests from the command line][] for more details.
+
+### `--test-name-pattern`
+
+<!-- YAML
+added: v18.11.0
+-->
+
+A regular expression that configures the test runner to only execute tests
+whose name matches the provided pattern. See the documentation on
+[filtering tests by name][] for more details.
 
 ### `--test-only`
 
@@ -1346,7 +1339,9 @@ for TLSv1.2, which is not as secure as TLSv1.3.
 
 <!-- YAML
 added: v14.3.0
-deprecated: v18.8.0
+deprecated:
+  - v18.8.0
+  - v16.18.0
 -->
 
 > Stability: 0 - Deprecated
@@ -1578,7 +1573,7 @@ will be chosen.
 ### `--watch`
 
 <!-- YAML
-added: REPLACEME
+added: v18.11.0
 -->
 
 > Stability: 1 - Experimental
@@ -1600,7 +1595,7 @@ $ node --watch index.js
 ### `--watch-path`
 
 <!-- YAML
-added: REPLACEME
+added: v18.11.0
 -->
 
 > Stability: 1 - Experimental
@@ -1836,7 +1831,6 @@ Node.js options that are allowed are:
 * `--enable-fips`
 * `--enable-source-maps`
 * `--experimental-abortcontroller`
-* `--experimental-global-customevent`
 * `--experimental-import-meta-resolve`
 * `--experimental-json-modules`
 * `--experimental-loader`
@@ -1869,6 +1863,7 @@ Node.js options that are allowed are:
 * `--no-addons`
 * `--no-deprecation`
 * `--no-experimental-fetch`
+* `--no-experimental-global-customevent`
 * `--no-experimental-global-webcrypto`
 * `--no-experimental-repl-await`
 * `--no-extra-info-on-fatal-exception`
@@ -2289,6 +2284,7 @@ done
 [`--heap-prof-dir`]: #--heap-prof-dir
 [`--import`]: #--importmodule
 [`--openssl-config`]: #--openssl-configfile
+[`--preserve-symlinks`]: #--preserve-symlinks
 [`--redirect-warnings`]: #--redirect-warningsfile
 [`--require`]: #-r---require-module
 [`Atomics.wait()`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics/wait
@@ -2311,10 +2307,10 @@ done
 [`worker_threads.threadId`]: worker_threads.md#workerthreadid
 [conditional exports]: packages.md#conditional-exports
 [context-aware]: addons.md#context-aware-addons
-[customizing ESM specifier resolution]: esm.md#customizing-esm-specifier-resolution-algorithm
 [debugger]: debugger.md
 [debugging security implications]: https://nodejs.org/en/docs/guides/debugging-getting-started/#security-implications
 [emit_warning]: process.md#processemitwarningwarning-options
+[filtering tests by name]: test.md#filtering-tests-by-name
 [jitless]: https://v8.dev/blog/jitless
 [libuv threadpool documentation]: https://docs.libuv.org/en/latest/threadpool.html
 [remote code execution]: https://www.owasp.org/index.php/Code_Injection

@@ -1311,8 +1311,9 @@ type other than {net.Socket}.
 
 Default behavior is to try close the socket with a HTTP '400 Bad Request',
 or a HTTP '431 Request Header Fields Too Large' in the case of a
-[`HPE_HEADER_OVERFLOW`][] error. If the socket is not writable or has already
-written data it is immediately destroyed.
+[`HPE_HEADER_OVERFLOW`][] error. If the socket is not writable or headers
+of the current attached [`http.ServerResponse`][] has been sent, it is
+immediately destroyed.
 
 `socket` is the [`net.Socket`][] object that the error originated from.
 
@@ -2137,35 +2138,46 @@ Sends an HTTP/1.1 100 Continue message to the client, indicating that
 the request body should be sent. See the [`'checkContinue'`][] event on
 `Server`.
 
-### `response.writeEarlyHints(links[, callback])`
+### `response.writeEarlyHints(hints[, callback])`
 
 <!-- YAML
-added: REPLACEME
+added: v18.11.0
+changes:
+  - version: v18.11.0
+    pr-url: https://github.com/nodejs/node/pull/44820
+    description: Allow passing hints as an object.
 -->
 
-* `links` {string|Array}
+* `hints` {Object}
 * `callback` {Function}
 
 Sends an HTTP/1.1 103 Early Hints message to the client with a Link header,
 indicating that the user agent can preload/preconnect the linked resources.
-The `links` can be a string or an array of strings containing the values
-of the `Link` header. The optional `callback` argument will be called when
+The `hints` is an object containing the values of headers to be sent with
+early hints message. The optional `callback` argument will be called when
 the response message has been written.
 
 **Example**
 
 ```js
 const earlyHintsLink = '</styles.css>; rel=preload; as=style';
-response.writeEarlyHints(earlyHintsLink);
+response.writeEarlyHints({
+  'link': earlyHintsLink,
+});
 
 const earlyHintsLinks = [
   '</styles.css>; rel=preload; as=style',
   '</scripts.js>; rel=preload; as=script',
 ];
-response.writeEarlyHints(earlyHintsLinks);
+response.writeEarlyHints({
+  'link': earlyHintsLinks,
+  'x-trace-id': 'id for diagnostics'
+});
 
 const earlyHintsCallback = () => console.log('early hints message sent');
-response.writeEarlyHints(earlyHintsLinks, earlyHintsCallback);
+response.writeEarlyHints({
+  'link': earlyHintsLinks,
+}, earlyHintsCallback);
 ```
 
 ### `response.writeHead(statusCode[, statusMessage][, headers])`
@@ -3679,7 +3691,9 @@ try {
 ## `http.setMaxIdleHTTPParsers`
 
 <!-- YAML
-added: v18.8.0
+added:
+  - v18.8.0
+  - v16.18.0
 -->
 
 * {number}

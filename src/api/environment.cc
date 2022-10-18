@@ -1,7 +1,9 @@
+#include <cstdlib>
 #include "node.h"
 #include "node_builtins.h"
 #include "node_context_data.h"
 #include "node_errors.h"
+#include "node_exit_code.h"
 #include "node_internals.h"
 #include "node_options-inl.h"
 #include "node_platform.h"
@@ -763,19 +765,34 @@ ThreadId AllocateEnvironmentThreadId() {
   return ThreadId { next_thread_id++ };
 }
 
-void DefaultProcessExitHandler(Environment* env, int exit_code) {
+[[noreturn]] void Exit(ExitCode exit_code) {
+  exit(static_cast<int>(exit_code));
+}
+
+void DefaultProcessExitHandlerInternal(Environment* env, ExitCode exit_code) {
   env->set_can_call_into_js(false);
   env->stop_sub_worker_contexts();
   env->isolate()->DumpAndResetStats();
   DisposePlatform();
   uv_library_shutdown();
-  exit(exit_code);
+  Exit(exit_code);
 }
 
+void DefaultProcessExitHandler(Environment* env, int exit_code) {
+  DefaultProcessExitHandlerInternal(env, static_cast<ExitCode>(exit_code));
+}
+
+void SetProcessExitHandler(
+    Environment* env, std::function<void(Environment*, ExitCode)>&& handler) {
+  env->set_process_exit_handler(std::move(handler));
+}
 
 void SetProcessExitHandler(Environment* env,
                            std::function<void(Environment*, int)>&& handler) {
-  env->set_process_exit_handler(std::move(handler));
+  auto movedHandler = std::move(handler);
+  env->set_process_exit_handler([=](Environment* env, ExitCode exit_code) {
+    movedHandler(env, static_cast<int>(exit_code));
+  });
 }
 
 }  // namespace node

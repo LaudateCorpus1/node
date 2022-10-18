@@ -485,14 +485,14 @@ stream.write('With ES6');
 <!-- YAML
 added: v0.3.0
 changes:
-  - version: REPLACEME
-    pr-url: https://github.com/nodejs/node/pull/43576
-    description: add support for `maxArrayLength` when inspecting `Set` and `Map`.
   - version:
     - v17.3.0
     - v16.14.0
     pr-url: https://github.com/nodejs/node/pull/41003
     description: The `numericSeparator` option is supported now.
+  - version: v16.18.0
+    pr-url: https://github.com/nodejs/node/pull/43576
+    description: add support for `maxArrayLength` when inspecting `Set` and `Map`.
   - version:
     - v14.6.0
     - v12.19.0
@@ -1031,6 +1031,9 @@ added:
   - v18.3.0
   - v16.17.0
 changes:
+  - version: v18.11.0
+    pr-url: https://github.com/nodejs/node/pull/44631
+    description: Add support for default values in input `config`.
   - version:
     - v18.7.0
     - v16.17.0
@@ -1053,6 +1056,9 @@ changes:
       times. If `true`, all values will be collected in an array. If
       `false`, values for the option are last-wins. **Default:** `false`.
     * `short` {string} A single character alias for the option.
+    * `default` {string | boolean | string\[] | boolean\[]} The default option
+      value when it is not set by args. It must be of the same type as the
+      the `type` property. When `multiple` is `true`, it must be an array.
   * `strict` {boolean} Should an error be thrown when unknown arguments
     are encountered, or when arguments are passed that do not match the
     `type` configured in `options`.
@@ -1600,7 +1606,7 @@ Unicode "replacement character" U+FFFD.
 ## `util.transferableAbortController()`
 
 <!-- YAML
-added: REPLACEME
+added: v18.11.0
 -->
 
 > Stability: 1 - Experimental
@@ -1611,7 +1617,7 @@ as transferable and can be used with `structuredClone()` or `postMessage()`.
 ## `util.transferableAbortSignal(signal)`
 
 <!-- YAML
-added: REPLACEME
+added: v18.11.0
 -->
 
 > Stability: 1 - Experimental

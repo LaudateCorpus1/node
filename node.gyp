@@ -48,9 +48,7 @@
       'deps/v8/tools/tickprocessor-driver.mjs',
       'deps/acorn/acorn/dist/acorn.js',
       'deps/acorn/acorn-walk/dist/walk.js',
-      'deps/cjs-module-lexer/lexer.js',
-      'deps/cjs-module-lexer/dist/lexer.js',
-      'deps/undici/undici.js',
+      '<@(node_builtin_shareable_builtins)',
     ],
     'node_mksnapshot_exec': '<(PRODUCT_DIR)/<(EXECUTABLE_PREFIX)node_mksnapshot<(EXECUTABLE_SUFFIX)',
     'conditions': [
@@ -465,6 +463,7 @@
         'src/api/hooks.cc',
         'src/api/utils.cc',
         'src/async_wrap.cc',
+        'src/base_object.cc',
         'src/cares_wrap.cc',
         'src/cleanup_queue.cc',
         'src/connect_wrap.cc',
@@ -599,6 +598,7 @@
         'src/node_contextify.h',
         'src/node_dir.h',
         'src/node_errors.h',
+        'src/node_exit_code.h',
         'src/node_external_reference.h',
         'src/node_file.h',
         'src/node_file-inl.h',
@@ -680,6 +680,8 @@
         'openssl_system_ca_path%': '',
         'openssl_default_cipher_list%': '',
       },
+
+      'cflags': ['-Werror=unused-result'],
 
       'defines': [
         'NODE_ARCH="<(target_arch)"',
